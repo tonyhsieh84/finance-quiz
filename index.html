@@ -1,1 +1,1155 @@
-test content
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Finance & Investing 101 - Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(15, 12, 41, 0.95);
+            border: 3px solid #d4af37;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 0 50px rgba(212, 175, 55, 0.4), 0 0 100px rgba(48, 43, 99, 0.5);
+            backdrop-filter: blur(10px);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+        }
+
+        .screen {
+            display: none;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Name Entry Screen */
+        .name-entry-screen {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 3.5em;
+            font-weight: bold;
+            color: #d4af37;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4);
+            margin-bottom: 20px;
+            letter-spacing: 2px;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4);
+            }
+            to {
+                text-shadow: 0 0 30px rgba(212, 175, 55, 1), 0 0 60px rgba(212, 175, 55, 0.6);
+            }
+        }
+
+        .subtitle {
+            font-size: 1.5em;
+            color: #b8860b;
+            margin-bottom: 30px;
+        }
+
+        .name-input-group {
+            margin: 40px 0;
+        }
+
+        .name-input-group label {
+            display: block;
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #d4af37;
+        }
+
+        .name-input-group input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px 20px;
+            font-size: 1.2em;
+            border: 2px solid #d4af37;
+            background: rgba(212, 175, 55, 0.1);
+            color: white;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .name-input-group input:focus {
+            outline: none;
+            background: rgba(212, 175, 55, 0.2);
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.5);
+        }
+
+        .start-button, .play-again-button, .next-button {
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+            color: #0f0c29;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .start-button:hover, .play-again-button:hover, .next-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6);
+            background: linear-gradient(45deg, #ffd700, #d4af37);
+        }
+
+        .start-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Game Screen */
+        .game-screen {
+            display: grid;
+            grid-template-columns: 1fr 3fr 1fr;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 1024px) {
+            .game-screen {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        /* Money Ladder */
+        .money-ladder {
+            order: 3;
+        }
+
+        @media (max-width: 1024px) {
+            .money-ladder {
+                order: 0;
+                grid-column: 1;
+            }
+        }
+
+        .ladder-item {
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .ladder-item.safe-haven::before {
+            content: '🛡️';
+            position: absolute;
+            left: 5px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .ladder-item.safe-haven {
+            background: rgba(76, 175, 80, 0.2);
+            border-color: rgba(76, 175, 80, 0.6);
+        }
+
+        .ladder-item.current {
+            background: rgba(212, 175, 55, 0.4);
+            border-color: #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
+            font-weight: bold;
+            transform: scale(1.05);
+        }
+
+        .ladder-item.passed {
+            background: rgba(76, 175, 80, 0.3);
+            border-color: rgba(76, 175, 80, 0.6);
+            color: #4caf50;
+        }
+
+        /* Question Section */
+        .question-section {
+            order: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .question-section {
+                order: 0;
+                grid-column: 1;
+            }
+        }
+
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .question-number {
+            font-size: 1.3em;
+            color: #d4af37;
+            font-weight: bold;
+        }
+
+        .current-prize {
+            font-size: 1.5em;
+            color: #4caf50;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(76, 175, 80, 0.6);
+        }
+
+        .timer-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .timer {
+            font-size: 2.5em;
+            font-weight: bold;
+            padding: 10px 20px;
+            border: 3px solid #d4af37;
+            border-radius: 10px;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .timer.warning {
+            color: #ff6b6b;
+            border-color: #ff6b6b;
+            box-shadow: 0 0 20px rgba(255, 107, 107, 0.6);
+        }
+
+        .timer.danger {
+            color: #ff0000;
+            border-color: #ff0000;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.8);
+            animation: pulse 0.5s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .question-text {
+            font-size: 1.5em;
+            margin: 30px 0;
+            line-height: 1.6;
+            color: #ffffff;
+            font-weight: 500;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        @media (max-width: 768px) {
+            .options {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .option {
+            padding: 20px;
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1em;
+            font-weight: 500;
+            position: relative;
+        }
+
+        .option:hover:not(.disabled) {
+            background: rgba(212, 175, 55, 0.2);
+            border-color: #d4af37;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.3);
+        }
+
+        .option.selected {
+            background: rgba(212, 175, 55, 0.4);
+            border-color: #d4af37;
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.6);
+        }
+
+        .option.correct {
+            background: rgba(76, 175, 80, 0.5);
+            border-color: #4caf50;
+            box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+        }
+
+        .option.incorrect {
+            background: rgba(244, 67, 54, 0.5);
+            border-color: #f44336;
+            box-shadow: 0 0 20px rgba(244, 67, 54, 0.6);
+        }
+
+        .option.disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .option-label {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #d4af37;
+            color: #0f0c29;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 15px;
+        }
+
+        /* Results Screen */
+        .results-screen {
+            text-align: center;
+        }
+
+        .final-score {
+            font-size: 2.5em;
+            color: #d4af37;
+            margin: 30px 0;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+        }
+
+        .rank-badge {
+            font-size: 3em;
+            margin: 30px 0;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .rank-title {
+            font-size: 2em;
+            color: #d4af37;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(212, 175, 55, 0.8);
+        }
+
+        .rank-description {
+            font-size: 1.2em;
+            color: #b8860b;
+            margin: 20px 0 40px 0;
+            line-height: 1.6;
+        }
+
+        .stats {
+            background: rgba(212, 175, 55, 0.1);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .stat-item {
+            margin: 10px 0;
+            font-size: 1.1em;
+        }
+
+        .stat-label {
+            color: #b8860b;
+            font-weight: bold;
+        }
+
+        .stat-value {
+            color: #4caf50;
+            font-weight: bold;
+        }
+
+        /* Player Info */
+        .player-info {
+            order: 2;
+            text-align: center;
+        }
+
+        @media (max-width: 1024px) {
+            .player-info {
+                order: 0;
+                grid-column: 1;
+            }
+        }
+
+        .player-name {
+            font-size: 1.3em;
+            color: #d4af37;
+            margin-bottom: 10px;
+        }
+
+        .player-status {
+            font-size: 1em;
+            color: #b8860b;
+        }
+
+        /* Animations */
+        .shake {
+            animation: shake 0.5s;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .correct-animation {
+            animation: correctAnswer 0.6s ease-out;
+        }
+
+        @keyframes correctAnswer {
+            0% {
+                transform: scale(1);
+                background-color: rgba(76, 175, 80, 0.2);
+            }
+            50% {
+                transform: scale(1.05);
+                background-color: rgba(76, 175, 80, 0.5);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .message {
+            font-size: 1.3em;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .message.correct {
+            background: rgba(76, 175, 80, 0.3);
+            color: #4caf50;
+            border: 2px solid rgba(76, 175, 80, 0.6);
+        }
+
+        .message.incorrect {
+            background: rgba(244, 67, 54, 0.3);
+            color: #ff6b6b;
+            border: 2px solid rgba(244, 67, 54, 0.6);
+        }
+
+        .next-button {
+            margin-top: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .title {
+                font-size: 2em;
+            }
+
+            .subtitle {
+                font-size: 1.1em;
+            }
+
+            .question-text {
+                font-size: 1.2em;
+            }
+
+            .option {
+                font-size: 1em;
+                padding: 15px;
+            }
+
+            .final-score {
+                font-size: 1.8em;
+            }
+
+            .rank-badge {
+                font-size: 2em;
+            }
+
+            .rank-title {
+                font-size: 1.5em;
+            }
+        }
+
+        .celebration-text {
+            font-size: 1.3em;
+            color: #ffd700;
+            margin: 20px 0;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Name Entry Screen -->
+        <div class="screen active name-entry-screen">
+            <h1 class="title">💰 WHO WANTS TO BE A MILLIONAIRE?</h1>
+            <p class="subtitle">Personal Finance & Investing 101</p>
+            <div class="name-input-group">
+                <label for="playerName">Enter Your Name:</label>
+                <input type="text" id="playerName" placeholder="Your name here..." maxlength="30">
+            </div>
+            <p class="player-status">Test your knowledge about personal finance and investing!</p>
+            <button class="start-button" onclick="startGame()">Start Game</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="screen game-screen" id="gameScreen">
+            <!-- Money Ladder -->
+            <div class="money-ladder" id="moneyLadder"></div>
+
+            <!-- Question Section -->
+            <div class="question-section">
+                <div class="question-header">
+                    <div class="question-number">Question <span id="questionNumber">1</span> of 15</div>
+                    <div class="current-prize">Prize: $<span id="currentPrize">100</span></div>
+                </div>
+
+                <div class="timer-container">
+                    <div class="timer" id="timer">30</div>
+                </div>
+
+                <div class="question-text" id="questionText"></div>
+
+                <div class="options" id="optionsContainer"></div>
+
+                <div class="message" id="message" style="display: none;"></div>
+
+                <button class="next-button" id="nextButton" onclick="nextQuestion()" style="display: none;">
+                    Next Question
+                </button>
+            </div>
+
+            <!-- Player Info -->
+            <div class="player-info">
+                <div class="player-name" id="playerNameDisplay"></div>
+                <div class="player-status" id="playerStatus">Good Luck!</div>
+            </div>
+        </div>
+
+        <!-- Results Screen -->
+        <div class="screen results-screen">
+            <h2 class="title">🎉 GAME OVER!</h2>
+            <div class="celebration-text" id="celebrationText"></div>
+            <div class="rank-badge" id="rankBadge"></div>
+            <div class="rank-title" id="rankTitle"></div>
+            <div class="rank-description" id="rankDescription"></div>
+            <div class="final-score">Final Prize: $<span id="finalScore">0</span></div>
+            <div class="stats">
+                <div class="stat-item"><span class="stat-label">Questions Correct:</span> <span class="stat-value" id="questionsCorrect">0</span>/15</div>
+                <div class="stat-item"><span class="stat-label">Accuracy:</span> <span class="stat-value" id="accuracy">0</span>%</div>
+                <div class="stat-item"><span class="stat-label">Highest Safe Haven Reached:</span> <span class="stat-value" id="safeHaven">$0</span></div>
+            </div>
+            <button class="play-again-button" onclick="location.reload()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Quiz Data
+        const quizData = [
+            {
+                question: "Why do we need to save and invest?",
+                options: [
+                    "To buy luxury items now",
+                    "To protect our future selves and build wealth",
+                    "Because our parents told us to",
+                    "To show off to friends"
+                ],
+                correct: 1,
+                prize: 100
+            },
+            {
+                question: "What are the two forms of capital that generate income?",
+                options: [
+                    "Cash and credit cards",
+                    "Stocks and bonds",
+                    "Human capital and financial capital",
+                    "Gold and silver"
+                ],
+                correct: 2,
+                prize: 200
+            },
+            {
+                question: "What does 'inflation' do to your money over time?",
+                options: [
+                    "Makes it worth more",
+                    "Keeps it the same",
+                    "Reduces its purchasing power",
+                    "Doubles it every year"
+                ],
+                correct: 2,
+                prize: 500
+            },
+            {
+                question: "In the 50/30/20 rule, what percentage goes to savings?",
+                options: [
+                    "50%",
+                    "30%",
+                    "10%",
+                    "20%"
+                ],
+                correct: 3,
+                prize: 1000
+            },
+            {
+                question: "What matters more than the exact percentage you save?",
+                options: [
+                    "Having a high income",
+                    "Investing in individual stocks",
+                    "Consistency",
+                    "Timing the market"
+                ],
+                correct: 2,
+                prize: 2000,
+                safeHaven: true
+            },
+            {
+                question: "What is 'lifestyle inflation'?",
+                options: [
+                    "When prices go up due to government policy",
+                    "When you increase spending every time your income goes up",
+                    "When rent increases annually",
+                    "When you buy a bigger house"
+                ],
+                correct: 1,
+                prize: 4000
+            },
+            {
+                question: "What is a bond?",
+                options: [
+                    "Buying ownership in a company",
+                    "Lending money to a government or company",
+                    "A type of savings account",
+                    "Insurance on your investments"
+                ],
+                correct: 1,
+                prize: 8000
+            },
+            {
+                question: "What is the typical annual return of the S&P 500 historically?",
+                options: [
+                    "1-3%",
+                    "3-5%",
+                    "~10.5%",
+                    "15-20%"
+                ],
+                correct: 2,
+                prize: 16000
+            },
+            {
+                question: "What did Warren Buffett recommend as the best investment for most people?",
+                options: [
+                    "Individual tech stocks",
+                    "Real estate",
+                    "A low-cost S&P 500 index fund",
+                    "Gold and silver"
+                ],
+                correct: 2,
+                prize: 32000
+            },
+            {
+                question: "What is an index fund?",
+                options: [
+                    "A single company's stock",
+                    "A fund that tracks hundreds of companies at once",
+                    "A government bond",
+                    "A high-interest savings account"
+                ],
+                correct: 1,
+                prize: 64000,
+                safeHaven: true
+            },
+            {
+                question: "Using the Rule of 72, if your return is 9%, how many years to double your money?",
+                options: [
+                    "6 years",
+                    "8 years",
+                    "9 years",
+                    "12 years"
+                ],
+                correct: 1,
+                prize: 125000
+            },
+            {
+                question: "In the tale of Wynter and Nolan, why did Wynter end up with MORE money despite investing LESS?",
+                options: [
+                    "Wynter picked better stocks",
+                    "Wynter started 10 years earlier, giving compound interest more time",
+                    "Wynter invested in real estate",
+                    "Nolan had bad luck"
+                ],
+                correct: 1,
+                prize: 250000
+            },
+            {
+                question: "If you invest $1,000 at 10.5% annual return, roughly how much will you have in 10 years?",
+                options: [
+                    "$1,700",
+                    "$2,714",
+                    "$3,500",
+                    "$10,500"
+                ],
+                correct: 1,
+                prize: 500000
+            },
+            {
+                question: "What should you build BEFORE you start investing?",
+                options: [
+                    "A stock portfolio",
+                    "A cryptocurrency wallet",
+                    "An emergency fund (1-3 months of expenses)",
+                    "A real estate portfolio"
+                ],
+                correct: 2,
+                prize: 750000
+            },
+            {
+                question: "Which statement BEST summarizes the key lesson of compound interest?",
+                options: [
+                    "You need a lot of money to start investing",
+                    "Time in the market beats timing the market — start early, even small",
+                    "Only invest when the market is going up",
+                    "Save all your money and never spend it"
+                ],
+                correct: 1,
+                prize: 1000000
+            }
+        ];
+
+        // Game State
+        let currentQuestion = 0;
+        let currentScore = 0;
+        let lastSafeHaven = 0;
+        let correctAnswers = 0;
+        let timerInterval = null;
+        let timeRemaining = 30;
+        let questionAnswered = false;
+
+        // Sound Effects using Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(type) {
+            try {
+                const now = audioContext.currentTime;
+
+                if (type === 'correct') {
+                    // Ascending beep for correct answer
+                    for (let i = 0; i < 3; i++) {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+
+                        osc.frequency.setValueAtTime(400 + (i * 200), now + i * 0.1);
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.3, now + i * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.15);
+
+                        osc.start(now + i * 0.1);
+                        osc.stop(now + i * 0.1 + 0.15);
+                    }
+                } else if (type === 'incorrect') {
+                    // Descending buzz for incorrect answer
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.frequency.setValueAtTime(800, now);
+                    osc.frequency.exponentialRampToValueAtTime(200, now + 0.3);
+                    osc.type = 'square';
+                    gain.gain.setValueAtTime(0.3, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                } else if (type === 'tick') {
+                    // Simple tick for timer
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    osc.connect(gain);
+                    gain.connect(audioContext.destination);
+
+                    osc.frequency.setValueAtTime(1000, now);
+                    osc.type = 'sine';
+                    gain.gain.setValueAtTime(0.1, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+                    osc.start(now);
+                    osc.stop(now + 0.1);
+                } else if (type === 'win') {
+                    // Winning fanfare
+                    const frequencies = [523.25, 659.25, 783.99, 1046.50];
+                    for (let i = 0; i < frequencies.length; i++) {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+
+                        osc.frequency.setValueAtTime(frequencies[i], now + i * 0.2);
+                        osc.type = 'sine';
+                        gain.gain.setValueAtTime(0.2, now + i * 0.2);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.2 + 0.3);
+
+                        osc.start(now + i * 0.2);
+                        osc.stop(now + i * 0.2 + 0.3);
+                    }
+                }
+            } catch (e) {
+                console.log('Audio context not available');
+            }
+        }
+
+        function initializeGame() {
+            buildMoneyLadder();
+            displayQuestion();
+            startTimer();
+            document.getElementById('playerNameDisplay').textContent = 'Player: ' + document.getElementById('playerName').value;
+        }
+
+        function buildMoneyLadder() {
+            const ladder = document.getElementById('moneyLadder');
+            ladder.innerHTML = '';
+
+            const prizes = [
+                100, 200, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000,
+                125000, 250000, 500000, 750000, 1000000
+            ];
+
+            for (let i = 14; i >= 0; i--) {
+                const item = document.createElement('div');
+                item.className = 'ladder-item';
+                item.id = 'ladder-' + i;
+
+                if ((i === 4) || (i === 9)) {
+                    item.classList.add('safe-haven');
+                }
+
+                if (i === 0) {
+                    item.classList.add('current');
+                }
+
+                const amount = prizes[i];
+                item.textContent = '$' + (amount >= 1000 ? (amount / 1000) + 'K' : amount);
+                ladder.appendChild(item);
+            }
+        }
+
+        function displayQuestion() {
+            if (currentQuestion >= quizData.length) {
+                endGame();
+                return;
+            }
+
+            questionAnswered = false;
+            timeRemaining = 30;
+
+            const q = quizData[currentQuestion];
+            document.getElementById('questionNumber').textContent = currentQuestion + 1;
+            document.getElementById('currentPrize').textContent = q.prize.toLocaleString();
+            document.getElementById('questionText').textContent = q.question;
+            document.getElementById('message').style.display = 'none';
+            document.getElementById('nextButton').style.display = 'none';
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            q.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                optionDiv.onclick = () => selectAnswer(index);
+
+                const label = document.createElement('span');
+                label.className = 'option-label';
+                label.textContent = String.fromCharCode(65 + index); // A, B, C, D
+
+                optionDiv.appendChild(label);
+                optionDiv.appendChild(document.createTextNode(option));
+                container.appendChild(optionDiv);
+            });
+
+            updateLadder();
+            startTimer();
+        }
+
+        function selectAnswer(index) {
+            if (questionAnswered) return;
+
+            questionAnswered = true;
+            clearInterval(timerInterval);
+
+            const q = quizData[currentQuestion];
+            const isCorrect = index === q.correct;
+
+            // Update display
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                if (i === index) {
+                    opt.classList.add(isCorrect ? 'correct' : 'incorrect');
+                }
+                if (i === q.correct && index !== q.correct) {
+                    opt.classList.add('correct');
+                }
+                opt.classList.add('disabled');
+            });
+
+            const message = document.getElementById('message');
+            message.style.display = 'block';
+
+            if (isCorrect) {
+                playSound('correct');
+                currentScore = q.prize;
+                correctAnswers++;
+                message.className = 'message correct';
+                message.textContent = '✅ Correct! Well done!';
+
+                if (q.safeHaven) {
+                    lastSafeHaven = currentScore;
+                }
+
+                document.getElementById('playerStatus').textContent = 'Excellent!';
+            } else {
+                playSound('incorrect');
+                currentScore = lastSafeHaven;
+                message.className = 'message incorrect';
+                message.textContent = `❌ Wrong! The correct answer is ${String.fromCharCode(65 + q.correct)}. You fall back to $${lastSafeHaven.toLocaleString()}`;
+
+                document.getElementById('playerStatus').textContent = 'Oops! Try again next time.';
+            }
+
+            if (currentQuestion === quizData.length - 1) {
+                document.getElementById('nextButton').textContent = 'See Results';
+            }
+
+            document.getElementById('nextButton').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion >= quizData.length) {
+                endGame();
+            } else {
+                displayQuestion();
+            }
+        }
+
+        function updateLadder() {
+            const items = document.querySelectorAll('.ladder-item');
+            items.forEach((item, index) => {
+                item.classList.remove('current', 'passed');
+                if (index === currentQuestion) {
+                    item.classList.add('current');
+                } else if (index < currentQuestion) {
+                    item.classList.add('passed');
+                }
+            });
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                const timerElement = document.getElementById('timer');
+                timerElement.textContent = timeRemaining;
+
+                timerElement.classList.remove('warning', 'danger');
+                if (timeRemaining <= 5) {
+                    timerElement.classList.add('danger');
+                    playSound('tick');
+                } else if (timeRemaining <= 10) {
+                    timerElement.classList.add('warning');
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    if (!questionAnswered) {
+                        // Time's up - mark as wrong
+                        const options = document.querySelectorAll('.option');
+                        const q = quizData[currentQuestion];
+
+                        questionAnswered = true;
+                        options.forEach((opt, i) => {
+                            if (i === q.correct) {
+                                opt.classList.add('correct');
+                            }
+                            opt.classList.add('disabled');
+                        });
+
+                        playSound('incorrect');
+                        currentScore = lastSafeHaven;
+                        const message = document.getElementById('message');
+                        message.style.display = 'block';
+                        message.className = 'message incorrect';
+                        message.textContent = `⏰ Time's up! The correct answer was ${String.fromCharCode(65 + q.correct)}. You fall back to $${lastSafeHaven.toLocaleString()}`;
+
+                        if (currentQuestion === quizData.length - 1) {
+                            document.getElementById('nextButton').textContent = 'See Results';
+                        }
+                        document.getElementById('nextButton').style.display = 'block';
+                    }
+                }
+            }, 1000);
+        }
+
+        function startGame() {
+            const name = document.getElementById('playerName').value.trim();
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            document.querySelector('.name-entry-screen').classList.remove('active');
+            document.getElementById('gameScreen').classList.add('active');
+            initializeGame();
+        }
+
+        function getRank(score) {
+            if (score === 1000000) {
+                return {
+                    title: 'Warren Buffett Jr. 👑',
+                    badge: '👑',
+                    description: 'You are a financial genius! You\'ve mastered the concepts of personal finance and investing. With this knowledge, you\'re ready to build generational wealth!'
+                };
+            } else if (score >= 500000) {
+                return {
+                    title: 'Wall Street Wolf 🐺',
+                    badge: '🐺',
+                    description: 'You\'re a financial powerhouse! You understand compound interest, diversification, and long-term investing strategies.'
+                };
+            } else if (score >= 32000) {
+                return {
+                    title: 'Index Fund Investor 📈',
+                    badge: '📈',
+                    description: 'Great job! You have a solid understanding of investing fundamentals and index funds. You\'re on your way to financial success!'
+                };
+            } else if (score >= 2000) {
+                return {
+                    title: 'Savings Account Pro 🏦',
+                    badge: '🏦',
+                    description: 'Good start! You understand basic saving and budgeting. Keep learning about investing to grow your wealth faster!'
+                };
+            } else {
+                return {
+                    title: 'Piggy Bank Beginner 🐷',
+                    badge: '🐷',
+                    description: 'You\'re just starting your financial journey! Keep learning, and you\'ll become a money expert in no time!'
+                };
+            }
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            document.getElementById('gameScreen').classList.remove('active');
+
+            const rank = getRank(currentScore);
+            const accuracy = Math.round((correctAnswers / 15) * 100);
+
+            document.getElementById('celebrationText').textContent =
+                currentScore === 1000000 ? '🎊 YOU WON THE MILLION! 🎊' : 'Great effort!';
+            document.getElementById('rankBadge').textContent = rank.badge;
+            document.getElementById('rankTitle').textContent = rank.title;
+            document.getElementById('rankDescription').textContent = rank.description;
+            document.getElementById('finalScore').textContent = currentScore.toLocaleString();
+            document.getElementById('questionsCorrect').textContent = correctAnswers;
+            document.getElementById('accuracy').textContent = accuracy;
+            document.getElementById('safeHaven').textContent = '$' + lastSafeHaven.toLocaleString();
+
+            if (currentScore === 1000000) {
+                playSound('win');
+                confetti({
+                    particleCount: 200,
+                    spread: 70,
+                    origin: { y: 0.6 }
+                });
+
+                // More confetti
+                setTimeout(() => {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 }
+                    });
+                }, 1000);
+            }
+
+            document.querySelector('.results-screen').classList.add('active');
+        }
+
+        // Allow Enter key to start game
+        document.getElementById('playerName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                startGame();
+            }
+        });
+    </script>
+</body>
+</html>
