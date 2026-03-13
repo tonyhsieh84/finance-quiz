@@ -545,7 +545,7 @@
             <div class="rank-description" id="rankDescription"></div>
             <div class="final-score">Score: <span id="finalScore">0</span> / 13</div>
             <div class="stats">
-                <div class="stat-item"><span class="stat-label">Questions Correct:</span> <span class="stat-value" id="questionsCorrect">0</span>/14</div>
+                <div class="stat-item"><span class="stat-label">Questions Correct:</span> <span class="stat-value" id="questionsCorrect">0</span>/13</div>
                 <div class="stat-item"><span class="stat-label">Accuracy:</span> <span class="stat-value" id="accuracy">0</span>%</div>
             </div>
             <div class="question-review" id="questionReview">
@@ -999,11 +999,8 @@
                 return;
             }
 
-            // Resume audio context on user gesture
-            if (audioContext.state === 'suspended') audioContext.resume();
-
-            // Start background music
-            startBackgroundMusic();
+            // Ensure music is playing
+            tryStartMusic();
 
             document.getElementById('nameScreen').classList.remove('active');
             document.getElementById('gameScreen').classList.add('active');
@@ -1262,6 +1259,20 @@
 
             document.getElementById('resultsScreen').classList.add('active');
         }
+
+        // Start music on first user interaction (autoplay policy requires a gesture)
+        let musicStarted = false;
+        function tryStartMusic() {
+            if (!musicStarted) {
+                musicStarted = true;
+                if (audioContext.state === 'suspended') audioContext.resume();
+                startBackgroundMusic();
+            }
+        }
+        document.getElementById('playerName').addEventListener('focus', tryStartMusic);
+        document.getElementById('playerName').addEventListener('input', tryStartMusic);
+        document.querySelector('.start-button').addEventListener('mousedown', tryStartMusic);
+        document.addEventListener('click', tryStartMusic, { once: true });
 
         // Allow Enter key to start game
         document.getElementById('playerName').addEventListener('keypress', (e) => {
