@@ -149,79 +149,15 @@
         /* Game Screen */
         .game-screen {
             display: grid;
-            grid-template-columns: 1fr 3fr 1fr;
-            gap: 30px;
+            grid-template-columns: 1fr;
+            gap: 20px;
             align-items: start;
-        }
-
-        @media (max-width: 1024px) {
-            .game-screen {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-        }
-
-        /* Money Ladder */
-        .money-ladder {
-            order: 3;
-        }
-
-        @media (max-width: 1024px) {
-            .money-ladder {
-                order: 0;
-                grid-column: 1;
-            }
-        }
-
-        .ladder-item {
-            padding: 12px 15px;
-            margin: 8px 0;
-            background: rgba(212, 175, 55, 0.1);
-            border: 2px solid rgba(212, 175, 55, 0.3);
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.9em;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .ladder-item.safe-haven::before {
-            content: '🛡️';
-            position: absolute;
-            left: 5px;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-
-        .ladder-item.safe-haven {
-            background: rgba(76, 175, 80, 0.2);
-            border-color: rgba(76, 175, 80, 0.6);
-        }
-
-        .ladder-item.current {
-            background: rgba(212, 175, 55, 0.4);
-            border-color: #d4af37;
-            box-shadow: 0 0 15px rgba(212, 175, 55, 0.6);
-            font-weight: bold;
-            transform: scale(1.05);
-        }
-
-        .ladder-item.passed {
-            background: rgba(76, 175, 80, 0.3);
-            border-color: rgba(76, 175, 80, 0.6);
-            color: #4caf50;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
         /* Question Section */
         .question-section {
-            order: 1;
-        }
-
-        @media (max-width: 1024px) {
-            .question-section {
-                order: 0;
-                grid-column: 1;
-            }
         }
 
         .question-header {
@@ -425,15 +361,8 @@
 
         /* Player Info */
         .player-info {
-            order: 2;
             text-align: center;
-        }
-
-        @media (max-width: 1024px) {
-            .player-info {
-                order: 0;
-                grid-column: 1;
-            }
+            margin-top: 20px;
         }
 
         .player-name {
@@ -564,13 +493,10 @@
 
         <!-- Game Screen -->
         <div class="screen game-screen" id="gameScreen">
-            <!-- Money Ladder -->
-            <div class="money-ladder" id="moneyLadder"></div>
-
             <!-- Question Section -->
             <div class="question-section">
                 <div class="question-header">
-                    <div class="question-number">Question <span id="questionNumber">1</span> of 15</div>
+                    <div class="question-number">Question <span id="questionNumber">1</span> of 14</div>
                     <div class="current-prize">Prize: $<span id="currentPrize">100</span></div>
                 </div>
 
@@ -605,7 +531,7 @@
             <div class="rank-description" id="rankDescription"></div>
             <div class="final-score">Final Prize: $<span id="finalScore">0</span></div>
             <div class="stats">
-                <div class="stat-item"><span class="stat-label">Questions Correct:</span> <span class="stat-value" id="questionsCorrect">0</span>/15</div>
+                <div class="stat-item"><span class="stat-label">Questions Correct:</span> <span class="stat-value" id="questionsCorrect">0</span>/14</div>
                 <div class="stat-item"><span class="stat-label">Accuracy:</span> <span class="stat-value" id="accuracy">0</span>%</div>
                 <div class="stat-item"><span class="stat-label">Highest Safe Haven Reached:</span> <span class="stat-value" id="safeHaven">$0</span></div>
             </div>
@@ -762,17 +688,6 @@
                 prize: 500000
             },
             {
-                question: "What should you build BEFORE you start investing?",
-                options: [
-                    "A stock portfolio",
-                    "A cryptocurrency wallet",
-                    "An emergency fund (1-3 months of expenses)",
-                    "A real estate portfolio"
-                ],
-                correct: 2,
-                prize: 750000
-            },
-            {
                 question: "Which statement BEST summarizes the key lesson of compound interest?",
                 options: [
                     "You need a lot of money to start investing",
@@ -870,38 +785,9 @@
         }
 
         function initializeGame() {
-            buildMoneyLadder();
             displayQuestion();
             startTimer();
             document.getElementById('playerNameDisplay').textContent = 'Player: ' + document.getElementById('playerName').value;
-        }
-
-        function buildMoneyLadder() {
-            const ladder = document.getElementById('moneyLadder');
-            ladder.innerHTML = '';
-
-            const prizes = [
-                100, 200, 500, 1000, 2000, 4000, 8000, 16000, 32000, 64000,
-                125000, 250000, 500000, 750000, 1000000
-            ];
-
-            for (let i = 14; i >= 0; i--) {
-                const item = document.createElement('div');
-                item.className = 'ladder-item';
-                item.id = 'ladder-' + i;
-
-                if ((i === 4) || (i === 9)) {
-                    item.classList.add('safe-haven');
-                }
-
-                if (i === 0) {
-                    item.classList.add('current');
-                }
-
-                const amount = prizes[i];
-                item.textContent = '$' + (amount >= 1000 ? (amount / 1000) + 'K' : amount);
-                ladder.appendChild(item);
-            }
         }
 
         function displayQuestion() {
@@ -937,7 +823,6 @@
                 container.appendChild(optionDiv);
             });
 
-            updateLadder();
             startTimer();
         }
 
@@ -1000,18 +885,6 @@
             } else {
                 displayQuestion();
             }
-        }
-
-        function updateLadder() {
-            const items = document.querySelectorAll('.ladder-item');
-            items.forEach((item, index) => {
-                item.classList.remove('current', 'passed');
-                if (index === currentQuestion) {
-                    item.classList.add('current');
-                } else if (index < currentQuestion) {
-                    item.classList.add('passed');
-                }
-            });
         }
 
         function startTimer() {
@@ -1111,7 +984,7 @@
             document.getElementById('gameScreen').classList.remove('active');
 
             const rank = getRank(currentScore);
-            const accuracy = Math.round((correctAnswers / 15) * 100);
+            const accuracy = Math.round((correctAnswers / 14) * 100);
 
             document.getElementById('celebrationText').textContent =
                 currentScore === 1000000 ? '🎊 YOU WON THE MILLION! 🎊' : 'Great effort!';
