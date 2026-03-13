@@ -130,6 +130,32 @@
             box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
         }
 
+        .submit-button {
+            padding: 14px 50px;
+            font-size: 1.15em;
+            background: linear-gradient(45deg, #555, #666);
+            color: #999;
+            border: none;
+            border-radius: 10px;
+            cursor: not-allowed;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: none;
+        }
+
+        .submit-button.enabled {
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+            color: #0f0c29;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+        }
+
+        .submit-button.enabled:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6);
+            background: linear-gradient(45deg, #ffd700, #d4af37);
+        }
+
         .start-button:hover, .play-again-button:hover {
             transform: translateY(-3px);
             box-shadow: 0 8px 30px rgba(212, 175, 55, 0.6);
@@ -515,6 +541,11 @@
             </div>
             <div class="question-text" id="questionText"></div>
             <div class="options" id="optionsContainer"></div>
+            <div style="text-align: center; margin-top: 30px;">
+                <button class="submit-button" id="submitButton" onclick="submitAnswer()" disabled>
+                    Next →
+                </button>
+            </div>
         </div>
 
         <!-- Loading Screen -->
@@ -701,92 +732,157 @@
         let currentQuestion = 0;
         let correctAnswers = 0;
         let playerAnswers = []; // store all answers: { selected, correct, isCorrect }
+        let selectedIndex = -1; // currently selected option (before submit)
         let musicPlaying = false;
         let bgMusicNodes = null;
 
         // Audio
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
 
-        // ===== BACKGROUND MUSIC =====
+        // ===== BACKGROUND MUSIC (Upbeat Game Show) =====
         function startBackgroundMusic() {
             if (bgMusicNodes) return;
             try {
-                const now = audioContext.currentTime;
                 const masterGain = audioContext.createGain();
-                masterGain.gain.setValueAtTime(0.06, now);
+                masterGain.gain.setValueAtTime(0.07, audioContext.currentTime);
                 masterGain.connect(audioContext.destination);
 
-                // Simple ambient loop using oscillators
-                // Chord progression: Cmaj7 -> Am7 -> Fmaj7 -> G7 (looping)
-                const chords = [
-                    [261.63, 329.63, 392.00, 493.88],  // Cmaj7
-                    [220.00, 261.63, 329.63, 392.00],  // Am7
-                    [174.61, 220.00, 261.63, 329.63],  // Fmaj7
-                    [196.00, 246.94, 293.66, 349.23],  // G7
-                ];
-
-                const loopDuration = 16; // 4 seconds per chord, 16s total
-                let oscillators = [];
+                const loopDuration = 8; // 8 seconds per loop (fast & exciting)
 
                 function createLoop() {
-                    const startTime = audioContext.currentTime;
+                    const t = audioContext.currentTime;
 
-                    chords.forEach((chord, ci) => {
-                        chord.forEach((freq, fi) => {
+                    // Driving bass line (punchy, rhythmic)
+                    const bassNotes = [
+                        { freq: 130.81, time: 0 },    // C3
+                        { freq: 130.81, time: 0.25 },
+                        { freq: 164.81, time: 0.5 },   // E3
+                        { freq: 196.00, time: 0.75 },   // G3
+                        { freq: 174.61, time: 1.0 },   // F3
+                        { freq: 174.61, time: 1.25 },
+                        { freq: 196.00, time: 1.5 },   // G3
+                        { freq: 220.00, time: 1.75 },   // A3
+                        { freq: 146.83, time: 2.0 },   // D3
+                        { freq: 146.83, time: 2.25 },
+                        { freq: 174.61, time: 2.5 },   // F3
+                        { freq: 196.00, time: 2.75 },   // G3
+                        { freq: 130.81, time: 3.0 },   // C3
+                        { freq: 164.81, time: 3.25 },
+                        { freq: 196.00, time: 3.5 },   // G3
+                        { freq: 261.63, time: 3.75 },   // C4
+                    ];
+
+                    // Play bass twice for 8 seconds
+                    [0, 4].forEach(offset => {
+                        bassNotes.forEach(note => {
                             const osc = audioContext.createOscillator();
                             const gain = audioContext.createGain();
                             osc.connect(gain);
                             gain.connect(masterGain);
-
-                            osc.type = 'sine';
-                            osc.frequency.setValueAtTime(freq, startTime + ci * 4);
-
-                            // Gentle fade in/out for each chord
-                            gain.gain.setValueAtTime(0, startTime + ci * 4);
-                            gain.gain.linearRampToValueAtTime(0.15, startTime + ci * 4 + 0.5);
-                            gain.gain.setValueAtTime(0.15, startTime + ci * 4 + 3.2);
-                            gain.gain.linearRampToValueAtTime(0, startTime + ci * 4 + 4);
-
-                            osc.start(startTime + ci * 4);
-                            osc.stop(startTime + ci * 4 + 4);
-                            oscillators.push(osc);
+                            osc.type = 'square';
+                            osc.frequency.setValueAtTime(note.freq, t + note.time + offset);
+                            gain.gain.setValueAtTime(0.18, t + note.time + offset);
+                            gain.gain.exponentialRampToValueAtTime(0.01, t + note.time + offset + 0.2);
+                            osc.start(t + note.time + offset);
+                            osc.stop(t + note.time + offset + 0.22);
                         });
                     });
 
-                    // Also add a gentle high-register melody
-                    const melodyNotes = [
-                        { freq: 523.25, time: 0, dur: 1 },
-                        { freq: 587.33, time: 1, dur: 1 },
-                        { freq: 659.25, time: 2, dur: 1.5 },
-                        { freq: 523.25, time: 4, dur: 1 },
-                        { freq: 493.88, time: 5, dur: 1 },
-                        { freq: 440.00, time: 6, dur: 1.5 },
-                        { freq: 349.23, time: 8, dur: 1 },
-                        { freq: 392.00, time: 9, dur: 1 },
-                        { freq: 440.00, time: 10, dur: 1.5 },
-                        { freq: 392.00, time: 12, dur: 1 },
-                        { freq: 349.23, time: 13, dur: 1 },
-                        { freq: 329.63, time: 14, dur: 1.5 },
+                    // Upbeat stab chords (brass-like hits)
+                    const chordHits = [
+                        { freqs: [523.25, 659.25, 783.99], time: 0, dur: 0.15 },      // C major
+                        { freqs: [523.25, 659.25, 783.99], time: 0.5, dur: 0.1 },
+                        { freqs: [349.23, 440.00, 523.25], time: 1.0, dur: 0.15 },     // F major
+                        { freqs: [349.23, 440.00, 523.25], time: 1.5, dur: 0.1 },
+                        { freqs: [293.66, 369.99, 440.00], time: 2.0, dur: 0.15 },     // Dm
+                        { freqs: [392.00, 493.88, 587.33], time: 2.75, dur: 0.15 },    // G major
+                        { freqs: [523.25, 659.25, 783.99], time: 3.0, dur: 0.2 },      // C major (big)
+                        { freqs: [523.25, 659.25, 783.99], time: 3.5, dur: 0.15 },
                     ];
 
-                    melodyNotes.forEach(note => {
+                    [0, 4].forEach(offset => {
+                        chordHits.forEach(chord => {
+                            chord.freqs.forEach(freq => {
+                                const osc = audioContext.createOscillator();
+                                const gain = audioContext.createGain();
+                                osc.connect(gain);
+                                gain.connect(masterGain);
+                                osc.type = 'sawtooth';
+                                osc.frequency.setValueAtTime(freq, t + chord.time + offset);
+                                gain.gain.setValueAtTime(0.08, t + chord.time + offset);
+                                gain.gain.exponentialRampToValueAtTime(0.005, t + chord.time + offset + chord.dur + 0.05);
+                                osc.start(t + chord.time + offset);
+                                osc.stop(t + chord.time + offset + chord.dur + 0.1);
+                            });
+                        });
+                    });
+
+                    // Exciting melody (game show theme feel)
+                    const melody = [
+                        { freq: 1046.50, time: 0, dur: 0.2 },      // C6
+                        { freq: 987.77, time: 0.25, dur: 0.2 },     // B5
+                        { freq: 1046.50, time: 0.5, dur: 0.3 },     // C6
+                        { freq: 783.99, time: 1.0, dur: 0.2 },      // G5
+                        { freq: 880.00, time: 1.25, dur: 0.2 },     // A5
+                        { freq: 783.99, time: 1.5, dur: 0.4 },      // G5
+                        { freq: 659.25, time: 2.0, dur: 0.2 },      // E5
+                        { freq: 698.46, time: 2.25, dur: 0.2 },     // F5
+                        { freq: 783.99, time: 2.5, dur: 0.2 },      // G5
+                        { freq: 880.00, time: 2.75, dur: 0.2 },     // A5
+                        { freq: 1046.50, time: 3.0, dur: 0.5 },     // C6 (held)
+                        { freq: 987.77, time: 3.5, dur: 0.15 },     // B5 (pickup)
+                        { freq: 1046.50, time: 3.75, dur: 0.2 },    // C6
+                    ];
+
+                    // Second half variation
+                    const melody2 = [
+                        { freq: 1174.66, time: 4, dur: 0.2 },       // D6
+                        { freq: 1046.50, time: 4.25, dur: 0.2 },    // C6
+                        { freq: 987.77, time: 4.5, dur: 0.3 },      // B5
+                        { freq: 880.00, time: 5.0, dur: 0.2 },      // A5
+                        { freq: 783.99, time: 5.25, dur: 0.2 },     // G5
+                        { freq: 880.00, time: 5.5, dur: 0.4 },      // A5
+                        { freq: 783.99, time: 6.0, dur: 0.2 },      // G5
+                        { freq: 659.25, time: 6.25, dur: 0.2 },     // E5
+                        { freq: 698.46, time: 6.5, dur: 0.2 },      // F5
+                        { freq: 783.99, time: 6.75, dur: 0.2 },     // G5
+                        { freq: 1046.50, time: 7.0, dur: 0.6 },     // C6 (big finish)
+                    ];
+
+                    [...melody, ...melody2].forEach(note => {
                         const osc = audioContext.createOscillator();
                         const gain = audioContext.createGain();
                         osc.connect(gain);
                         gain.connect(masterGain);
-
                         osc.type = 'triangle';
-                        osc.frequency.setValueAtTime(note.freq, startTime + note.time);
-
-                        gain.gain.setValueAtTime(0, startTime + note.time);
-                        gain.gain.linearRampToValueAtTime(0.08, startTime + note.time + 0.1);
-                        gain.gain.setValueAtTime(0.08, startTime + note.time + note.dur - 0.2);
-                        gain.gain.linearRampToValueAtTime(0, startTime + note.time + note.dur);
-
-                        osc.start(startTime + note.time);
-                        osc.stop(startTime + note.time + note.dur);
-                        oscillators.push(osc);
+                        osc.frequency.setValueAtTime(note.freq, t + note.time);
+                        gain.gain.setValueAtTime(0.12, t + note.time);
+                        gain.gain.setValueAtTime(0.12, t + note.time + note.dur * 0.7);
+                        gain.gain.exponentialRampToValueAtTime(0.005, t + note.time + note.dur);
+                        osc.start(t + note.time);
+                        osc.stop(t + note.time + note.dur + 0.02);
                     });
+
+                    // Hi-hat rhythm (tss tss tss tss) for energy
+                    for (let i = 0; i < 32; i++) {
+                        const bufferSize = audioContext.sampleRate * 0.03;
+                        const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+                        const data = buffer.getChannelData(0);
+                        for (let s = 0; s < bufferSize; s++) {
+                            data[s] = (Math.random() * 2 - 1) * (1 - s / bufferSize);
+                        }
+                        const noise = audioContext.createBufferSource();
+                        noise.buffer = buffer;
+                        const hpf = audioContext.createBiquadFilter();
+                        hpf.type = 'highpass';
+                        hpf.frequency.setValueAtTime(8000, t);
+                        const hGain = audioContext.createGain();
+                        hGain.gain.setValueAtTime(i % 2 === 0 ? 0.07 : 0.04, t + i * 0.25);
+                        noise.connect(hpf);
+                        hpf.connect(hGain);
+                        hGain.connect(masterGain);
+                        noise.start(t + i * 0.25);
+                    }
                 }
 
                 createLoop();
@@ -795,11 +891,10 @@
                         clearInterval(loopInterval);
                         return;
                     }
-                    oscillators = [];
                     createLoop();
                 }, loopDuration * 1000);
 
-                bgMusicNodes = { masterGain, loopInterval, oscillators };
+                bgMusicNodes = { masterGain, loopInterval };
                 musicPlaying = true;
                 document.getElementById('musicToggle').textContent = '🔊';
             } catch (e) {
@@ -847,6 +942,28 @@
                     gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
                     osc.start(now);
                     osc.stop(now + 0.12);
+                } else if (type === 'coin') {
+                    // Coin collect sound — bright metallic ding
+                    const osc1 = audioContext.createOscillator();
+                    const osc2 = audioContext.createOscillator();
+                    const gain1 = audioContext.createGain();
+                    const gain2 = audioContext.createGain();
+                    osc1.connect(gain1); gain1.connect(audioContext.destination);
+                    osc2.connect(gain2); gain2.connect(audioContext.destination);
+
+                    osc1.type = 'sine';
+                    osc1.frequency.setValueAtTime(1318.51, now); // E6
+                    gain1.gain.setValueAtTime(0.25, now);
+                    gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                    osc1.start(now);
+                    osc1.stop(now + 0.15);
+
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(1567.98, now + 0.08); // G6
+                    gain2.gain.setValueAtTime(0.25, now + 0.08);
+                    gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc2.start(now + 0.08);
+                    osc2.stop(now + 0.3);
                 } else if (type === 'loading') {
                     // Ascending pings during loading
                     for (let i = 0; i < 4; i++) {
@@ -957,6 +1074,12 @@
             const progress = (currentQuestion / quizData.length) * 100;
             document.getElementById('progressBar').style.width = progress + '%';
 
+            // Reset submit button
+            selectedIndex = -1;
+            const btn = document.getElementById('submitButton');
+            btn.disabled = true;
+            btn.classList.remove('enabled');
+
             document.getElementById('questionText').textContent = q.question;
 
             const container = document.getElementById('optionsContainer');
@@ -978,36 +1101,58 @@
         }
 
         function selectAnswer(index) {
-            const q = quizData[currentQuestion];
-            const isCorrect = index === q.correct;
-
-            // Play select sound
+            // Allow changing selection before submitting
+            selectedIndex = index;
             playSound('select');
+
+            // Highlight selected, unhighlight others
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.remove('selected');
+                if (i === index) {
+                    opt.classList.add('selected');
+                }
+            });
+
+            // Enable submit button
+            const btn = document.getElementById('submitButton');
+            btn.disabled = false;
+            btn.classList.add('enabled');
+        }
+
+        function submitAnswer() {
+            if (selectedIndex < 0) return;
+
+            const q = quizData[currentQuestion];
+            const isCorrect = selectedIndex === q.correct;
+
+            // Play coin sound
+            playSound('coin');
 
             // Record answer
             playerAnswers.push({
                 questionIndex: currentQuestion,
-                selected: index,
+                selected: selectedIndex,
                 correct: q.correct,
                 isCorrect: isCorrect
             });
 
             if (isCorrect) correctAnswers++;
 
-            // Brief highlight of selected option, then move on
+            // Disable options
             const options = document.querySelectorAll('.option');
-            options.forEach((opt, i) => {
-                opt.classList.add('disabled');
-                if (i === index) {
-                    opt.classList.add('selected');
-                }
-            });
+            options.forEach(opt => opt.classList.add('disabled'));
 
-            // Auto-advance after a short delay
+            // Reset and advance
+            selectedIndex = -1;
+            const btn = document.getElementById('submitButton');
+            btn.disabled = true;
+            btn.classList.remove('enabled');
+
             setTimeout(() => {
                 currentQuestion++;
                 displayQuestion();
-            }, 400);
+            }, 350);
         }
 
         // ===== LOADING SCREEN =====
