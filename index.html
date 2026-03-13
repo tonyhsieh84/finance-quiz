@@ -481,30 +481,6 @@
             50% { transform: translateY(-10px); }
         }
 
-        /* Music toggle button */
-        .music-toggle {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: rgba(212, 175, 55, 0.2);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            color: #d4af37;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2em;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10;
-        }
-
-        .music-toggle:hover {
-            background: rgba(212, 175, 55, 0.3);
-        }
-
         @media (max-width: 768px) {
             .title { font-size: 2em; }
             .subtitle { font-size: 1.1em; }
@@ -519,9 +495,6 @@
 </head>
 <body>
     <div class="container">
-        <!-- Music Toggle -->
-        <button class="music-toggle" id="musicToggle" onclick="toggleMusic()" title="Toggle music">🔊</button>
-
         <!-- Name Entry Screen -->
         <div class="screen active name-entry-screen" id="nameScreen">
             <h1 class="title">💰 WHO WANTS TO BE A MILLIONAIRE?</h1>
@@ -570,7 +543,7 @@
             <div class="rank-badge" id="rankBadge"></div>
             <div class="rank-title" id="rankTitle"></div>
             <div class="rank-description" id="rankDescription"></div>
-            <div class="final-score">Score: <span id="finalScore">0</span> / 14</div>
+            <div class="final-score">Score: <span id="finalScore">0</span> / 13</div>
             <div class="stats">
                 <div class="stat-item"><span class="stat-label">Questions Correct:</span> <span class="stat-value" id="questionsCorrect">0</span>/14</div>
                 <div class="stat-item"><span class="stat-label">Accuracy:</span> <span class="stat-value" id="accuracy">0</span>%</div>
@@ -635,16 +608,6 @@
                     "Timing the market"
                 ],
                 correct: 2
-            },
-            {
-                question: "What is 'lifestyle inflation'?",
-                options: [
-                    "When prices go up due to government policy",
-                    "When you increase spending every time your income goes up",
-                    "When rent increases annually",
-                    "When you buy a bigger house"
-                ],
-                correct: 1
             },
             {
                 question: "What is a bond?",
@@ -896,7 +859,6 @@
 
                 bgMusicNodes = { masterGain, loopInterval };
                 musicPlaying = true;
-                document.getElementById('musicToggle').textContent = '🔊';
             } catch (e) {
                 console.log('Background music failed:', e);
             }
@@ -912,16 +874,6 @@
                 }, 600);
             }
             musicPlaying = false;
-            document.getElementById('musicToggle').textContent = '🔇';
-        }
-
-        function toggleMusic() {
-            if (audioContext.state === 'suspended') audioContext.resume();
-            if (musicPlaying) {
-                stopBackgroundMusic();
-            } else {
-                startBackgroundMusic();
-            }
         }
 
         // ===== SOUND EFFECTS =====
