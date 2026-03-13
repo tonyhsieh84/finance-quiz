@@ -1279,20 +1279,14 @@
                     hint: ba.hint
                 });
 
-                if (isCorrect) {
-                    input.classList.add('correct-input');
-                    correctAnswers++;
-                } else {
-                    input.classList.add('incorrect-input');
-                }
-                input.disabled = true;
+                if (isCorrect) correctAnswers++;
             });
 
-            // Brief pause to show green/red, then go to loading
+            // Go straight to loading — no feedback shown here
             setTimeout(() => {
                 document.getElementById('bonusScreen').classList.remove('active');
                 showLoadingScreen();
-            }, 1200);
+            }, 350);
         }
 
         // ===== LOADING SCREEN =====
