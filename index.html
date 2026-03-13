@@ -251,6 +251,111 @@
             margin-right: 15px;
         }
 
+        /* ===== BONUS QUESTION SCREEN ===== */
+        .bonus-container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .bonus-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .bonus-badge {
+            display: inline-block;
+            background: linear-gradient(45deg, #d4af37, #ffd700);
+            color: #0f0c29;
+            font-weight: bold;
+            font-size: 0.9em;
+            padding: 6px 18px;
+            border-radius: 20px;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+        }
+
+        .bonus-title {
+            font-size: 1.25em;
+            color: #ffffff;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        .bonus-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .bonus-card {
+            display: grid;
+            grid-template-columns: 36px 1fr;
+            grid-template-rows: auto auto;
+            gap: 4px 14px;
+            background: rgba(212, 175, 55, 0.06);
+            border: 1.5px solid rgba(212, 175, 55, 0.25);
+            border-radius: 12px;
+            padding: 16px 18px;
+        }
+
+        .bonus-number {
+            grid-row: 1 / 3;
+            width: 36px;
+            height: 36px;
+            background: #d4af37;
+            color: #0f0c29;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1em;
+            align-self: center;
+        }
+
+        .bonus-hint {
+            font-size: 0.95em;
+            color: #b8860b;
+            line-height: 1.4;
+            font-style: italic;
+        }
+
+        .bonus-input {
+            width: 100%;
+            padding: 10px 14px;
+            font-size: 1.05em;
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            background: rgba(212, 175, 55, 0.08);
+            color: white;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            margin-top: 2px;
+        }
+
+        .bonus-input:focus {
+            outline: none;
+            border-color: #d4af37;
+            background: rgba(212, 175, 55, 0.15);
+            box-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
+        }
+
+        .bonus-input.correct-input {
+            border-color: #4caf50;
+            background: rgba(76, 175, 80, 0.15);
+        }
+
+        .bonus-input.incorrect-input {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.15);
+        }
+
+        @media (max-width: 768px) {
+            .bonus-title { font-size: 1.1em; }
+            .bonus-hint { font-size: 0.88em; }
+            .bonus-input { font-size: 0.95em; padding: 9px 12px; }
+            .bonus-card { padding: 13px 14px; }
+        }
+
         /* ===== LOADING SCREEN ===== */
         .loading-screen {
             text-align: center;
@@ -521,6 +626,41 @@
             </div>
         </div>
 
+        <!-- Bonus Question Screen -->
+        <div class="screen" id="bonusScreen">
+            <div class="bonus-container">
+                <div class="bonus-header">
+                    <span class="bonus-badge">⭐ BONUS ROUND</span>
+                    <h2 class="bonus-title">What are the 4 SAT vocab words that best describe the reasons to save and invest?</h2>
+                </div>
+                <div class="bonus-cards">
+                    <div class="bonus-card">
+                        <div class="bonus-number">1</div>
+                        <div class="bonus-hint">Have food to eat and a place to live when you are old</div>
+                        <input type="text" class="bonus-input" id="bonus1" placeholder="Type your answer..." maxlength="30" autocomplete="off">
+                    </div>
+                    <div class="bonus-card">
+                        <div class="bonus-number">2</div>
+                        <div class="bonus-hint">Have freedom to pursue whatever your heart tells you</div>
+                        <input type="text" class="bonus-input" id="bonus2" placeholder="Type your answer..." maxlength="30" autocomplete="off">
+                    </div>
+                    <div class="bonus-card">
+                        <div class="bonus-number">3</div>
+                        <div class="bonus-hint">Can withstand life's unpredictable and unfortunate turns</div>
+                        <input type="text" class="bonus-input" id="bonus3" placeholder="Type your answer..." maxlength="30" autocomplete="off">
+                    </div>
+                    <div class="bonus-card">
+                        <div class="bonus-number">4</div>
+                        <div class="bonus-hint">Have a full burger rather than 1/4 one when you are old</div>
+                        <input type="text" class="bonus-input" id="bonus4" placeholder="Type your answer..." maxlength="30" autocomplete="off">
+                    </div>
+                </div>
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="submit-button enabled" onclick="submitBonus()">Submit Bonus →</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Loading Screen -->
         <div class="screen loading-screen" id="loadingScreen">
             <div class="loading-title">Calculating Your Results...</div>
@@ -543,7 +683,7 @@
             <div class="rank-badge" id="rankBadge"></div>
             <div class="rank-title" id="rankTitle"></div>
             <div class="rank-description" id="rankDescription"></div>
-            <div class="final-score">Score: <span id="finalScore">0</span> / 13</div>
+            <div class="final-score">Score: <span id="finalScore">0</span> / 17</div>
             <div class="stats">
                 <div class="stat-item"><span class="stat-label">Questions Correct:</span> <span class="stat-value" id="questionsCorrect">0</span>/13</div>
                 <div class="stat-item"><span class="stat-label">Accuracy:</span> <span class="stat-value" id="accuracy">0</span>%</div>
@@ -1013,7 +1153,7 @@
 
         function displayQuestion() {
             if (currentQuestion >= quizData.length) {
-                showLoadingScreen();
+                showBonusQuestion();
                 return;
             }
 
@@ -1104,6 +1244,57 @@
             }, 350);
         }
 
+        // ===== BONUS QUESTION =====
+        const bonusAnswers = [
+            { answer: 'sustainability', hint: 'Have food to eat and a place to live when you are old' },
+            { answer: 'independence', hint: 'Have freedom to pursue whatever your heart tells you' },
+            { answer: 'resilience', hint: "Can withstand life's unpredictable and unfortunate turns" },
+            { answer: 'preservation', hint: 'Have a full burger rather than 1/4 one when you are old' },
+        ];
+        let bonusResults = [];
+
+        function showBonusQuestion() {
+            document.getElementById('progressBar').style.width = '100%';
+
+            setTimeout(() => {
+                document.getElementById('gameScreen').classList.remove('active');
+                document.getElementById('bonusScreen').classList.add('active');
+                document.getElementById('bonus1').focus();
+            }, 300);
+        }
+
+        function submitBonus() {
+            playSound('coin');
+            bonusResults = [];
+
+            bonusAnswers.forEach((ba, i) => {
+                const input = document.getElementById('bonus' + (i + 1));
+                const userVal = input.value.trim().toLowerCase();
+                const isCorrect = userVal === ba.answer;
+
+                bonusResults.push({
+                    correct: ba.answer,
+                    given: input.value.trim(),
+                    isCorrect: isCorrect,
+                    hint: ba.hint
+                });
+
+                if (isCorrect) {
+                    input.classList.add('correct-input');
+                    correctAnswers++;
+                } else {
+                    input.classList.add('incorrect-input');
+                }
+                input.disabled = true;
+            });
+
+            // Brief pause to show green/red, then go to loading
+            setTimeout(() => {
+                document.getElementById('bonusScreen').classList.remove('active');
+                showLoadingScreen();
+            }, 1200);
+        }
+
         // ===== LOADING SCREEN =====
         function showLoadingScreen() {
             // Fill progress bar to 100%
@@ -1159,7 +1350,8 @@
 
         // ===== RESULTS =====
         function getRank(score) {
-            const pct = score / quizData.length;
+            const totalQuestions = quizData.length + bonusAnswers.length;
+            const pct = score / totalQuestions;
             if (pct === 1) {
                 return {
                     title: 'Warren Buffett Jr. 👑',
@@ -1197,10 +1389,11 @@
             document.getElementById('loadingScreen').classList.remove('active');
 
             const rank = getRank(correctAnswers);
-            const accuracy = Math.round((correctAnswers / quizData.length) * 100);
+            const totalQ = quizData.length + bonusAnswers.length;
+            const accuracy = Math.round((correctAnswers / totalQ) * 100);
 
             document.getElementById('celebrationText').textContent =
-                correctAnswers === quizData.length ? '🎊 PERFECT SCORE! 🎊' : 'Great effort!';
+                correctAnswers === totalQ ? '🎊 PERFECT SCORE! 🎊' : 'Great effort!';
             document.getElementById('rankBadge').textContent = rank.badge;
             document.getElementById('rankTitle').textContent = rank.title;
             document.getElementById('rankDescription').textContent = rank.description;
@@ -1245,14 +1438,55 @@
                 reviewList.appendChild(item);
             });
 
+            // Add bonus results to review
+            if (bonusResults.length > 0) {
+                const bonusHeader = document.createElement('div');
+                bonusHeader.style.cssText = 'margin-top: 20px; margin-bottom: 12px; color: #d4af37; font-weight: bold; font-size: 1.1em;';
+                bonusHeader.textContent = '⭐ Bonus Round';
+                reviewList.appendChild(bonusHeader);
+
+                bonusResults.forEach((br, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'review-item ' + (br.isCorrect ? 'review-correct' : 'review-incorrect');
+
+                    const icon = document.createElement('div');
+                    icon.className = 'review-icon';
+                    icon.textContent = br.isCorrect ? '✅' : '❌';
+
+                    const content = document.createElement('div');
+                    content.className = 'review-content';
+
+                    const questionEl = document.createElement('div');
+                    questionEl.className = 'review-question';
+                    questionEl.textContent = 'Hint: "' + br.hint + '"';
+
+                    const answerEl = document.createElement('div');
+                    answerEl.className = 'review-answer';
+
+                    if (br.isCorrect) {
+                        answerEl.innerHTML = 'Your answer: <span class="correct-answer">' + br.given + '</span>';
+                    } else {
+                        const givenText = br.given || '(no answer)';
+                        answerEl.innerHTML = 'Your answer: ' + givenText +
+                            ' &nbsp;|&nbsp; Correct: <span class="correct-answer">' + br.correct.charAt(0).toUpperCase() + br.correct.slice(1) + '</span>';
+                    }
+
+                    content.appendChild(questionEl);
+                    content.appendChild(answerEl);
+                    item.appendChild(icon);
+                    item.appendChild(content);
+                    reviewList.appendChild(item);
+                });
+            }
+
             // Celebration effects
-            if (correctAnswers === quizData.length) {
+            if (correctAnswers === totalQ) {
                 playSound('win');
                 confetti({ particleCount: 200, spread: 70, origin: { y: 0.6 } });
                 setTimeout(() => {
                     confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 }, 1000);
-            } else if (correctAnswers >= quizData.length * 0.85) {
+            } else if (correctAnswers >= totalQ * 0.85) {
                 playSound('win');
                 confetti({ particleCount: 100, spread: 50, origin: { y: 0.6 } });
             }
